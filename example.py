@@ -53,10 +53,8 @@ if __name__ == '__main__':
             qrcode_scanner.run()
         except:
             type, value, tb = sys.exc_info()
-            logging.critical('Unhandled exception')
             with open(error_log, 'a') as f:
                 traceback.print_exc(file=f)
     else:
         logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-        logger.info('Fuck')
         qrcode_scanner.run()
