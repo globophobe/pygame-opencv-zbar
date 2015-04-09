@@ -17,7 +17,7 @@ class PygameWindow(object):
     def __init__(
             self,
             name=u'QR Code Scanner',
-            dshow=True,
+            dshow=False,
             font=None,
             url=None,
             resolution=(640, 480),
@@ -141,7 +141,9 @@ class PygameWindow(object):
         cam = self.camera.resolution
         return min(
             resolutions,
-            key=lambda r: abs((r[0] * r[1]) - (cam[0] * cam[1]))
+            # The best result seems to be the absolute value of the difference 
+            # of areas.
+            key=lambda r: abs((cam[0] * cam[1]) - (r[0] * r[1]))
         )
 
     def init_window(self, name, resolution, fullscreen=False):
