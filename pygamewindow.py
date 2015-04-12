@@ -17,7 +17,7 @@ class PygameWindow(object):
     def __init__(
             self,
             name=u'QR Code Scanner',
-            dshow=False,
+            direct_show=False,
             font=None,
             url=None,
             resolution=(640, 480),
@@ -37,7 +37,7 @@ class PygameWindow(object):
         pygame.display.init()
         pygame.mixer.init()
         # First, initialize camera.
-        self.init_camera(resolution, dshow=dshow)
+        self.init_camera(resolution, dshow=direct_show)
         # Then, initialize the pygame window with the same resolution as the
         # camera.
         self.init_window(name, self.camera.resolution, fullscreen=fullscreen)
@@ -57,16 +57,6 @@ class PygameWindow(object):
     def get_resolutions_for_current_aspect_ratio(self):
         aspect_ratio = self.get_current_aspect_ratio()
         return self.get_resolutions(aspect_ratio)
-
-    def is_supported_aspect_ratio(self, aspect_ratio):
-        sixteen_by_ten = (aspect_ratio == SIXTEEN_BY_TEN)
-        sixteen_by_nine = (aspect_ratio == SIXTEEN_BY_NINE)
-        four_by_three = (aspect_ratio == FOUR_BY_THREE)
-        return sixteen_by_ten or sixteen_by_nine or four_by_three
-
-    def get_resolutions_for_target_aspect_ratio(self, aspect_ratio):
-        if self.is_supported_aspect_ratio(aspect_ratio):
-            return self.get_resolutions(target_aspect_ratio=aspect_ratio)
 
     def get_resolutions(self, target_aspect_ratio=None):
         aspect_ratios = {
@@ -96,28 +86,11 @@ class PygameWindow(object):
                     break
         if resolution == (0, 0):
             resolutions = self.get_resolutions_for_current_aspect_ratio()
-            logger.info('Supported resolutions {}'.format(resolutions))
             set_camera(resolutions)
         else:
-            aspect_ratio = round(resolution[0] / float(resolution[1]), 2)
-            resolutions = self.get_resolutions_for_target_aspect_ratio(
-                aspect_ratio
-            )
-            logger.info('Supported {} aspect ratio {} resolutions'.format(
-                aspect_ratio, resolutions
-            ))
-            if resolution in resolutions:
-                index = resolutions.index(resolution)
-                del resolutions[index]
-                resolutions.insert(0, resolution)
-            set_camera(resolutions)
+            set_camera([resolution])
 
     def set_camera(self, resolution, dshow=True):
-        """First try to use VideoCapture, then falls back on OpenCV. On Windows,
-        VideoCapture performance is far and beyond that of OpenCV. However, on
-        Mac and Linux, the better performance of GStreamer isn't worth the
-        extra dependencies.
-        """
         if platform.system() == 'Windows' and dshow:
             # TODO : Ensure the camera is set.
             # Setting resolution may fail, with an error.
@@ -139,12 +112,15 @@ class PygameWindow(object):
     def fit_camera_to_display(self):
         resolutions = self.get_resolutions_for_current_aspect_ratio()
         cam = self.camera.resolution
-        return min(
+        logger.info('Supported resolutions {}'.format(resolutions))
+        fit_to_camera = min(
             resolutions,
-            # The best result seems to be the absolute value of the difference 
+            # The best result seems to be the absolute value of the difference
             # of areas.
             key=lambda r: abs((cam[0] * cam[1]) - (r[0] * r[1]))
         )
+        logger.info('Best resolution {}'.format(fit_to_camera))
+        return fit_to_camera
 
     def init_window(self, name, resolution, fullscreen=False):
         pygame.display.set_caption(name)
@@ -171,9 +147,10 @@ class PygameWindow(object):
         return font
 
     def load_user_interface(self):
-        self.loading_message()
+        self.system_message(startup=True)
 
-    def loading_message(self, msg='Loading...'):
+    def system_message(self, msg='Loading...', startup=False):
+        BLACK = (0, 0, 0)
         ALICE_BLUE = (240, 248, 255)
         msg = self.get_font_size(48).render(
             msg, True, ALICE_BLUE
@@ -181,8 +158,10 @@ class PygameWindow(object):
         w, h = self.display_surface.get_size()
         w = w - msg.get_width()
         h = h - msg.get_height()
+        self.display_surface.fill(BLACK)
         self.display_surface.blit(msg, (int(w / 2.0), int(h / 2)))
-        pygame.display.flip()
+        if startup:
+            pygame.display.flip()
 
     def init_scanner(self):
         # Show a loading message while QR code scanner initializes.
@@ -196,18 +175,23 @@ class PygameWindow(object):
     def main(self):
         # Prefered interface to OpenCV, with cv2.VideoCapture.grab()
         self.camera.enter_frame()
-        frame = self.scanner.main(self.camera.frame, self.timestamp)
-        frame = self.resize_frame(frame)
-        # Find the frame's dimensions in (w, h) format.
-        frame_size = frame.shape[1::-1]
-        # Mirror preview after processing, or ZBar can't find QR codes.
-        if self.mirror_frame:
-            frame = numpy.fliplr(frame)
-        # Convert the frame to Pygame's Surface type.
-        pygame_frame = pygame.image.frombuffer(
-            frame.tostring(), frame_size, 'RGB'
-        )
-        self.display_surface.blit(pygame_frame, (0, 0))
+
+        if not self.camera.frame.size:
+            self.system_message(msg='Invalid frame from camera.')
+        else:
+            frame = self.scanner.main(self.camera.frame, self.timestamp)
+            frame = self.resize_frame(frame)
+            # Find the frame's dimensions in (w, h) format.
+            frame_size = frame.shape[1::-1]
+            # Mirror preview after processing, or ZBar can't find QR codes.
+            if self.mirror_frame:
+                frame = numpy.fliplr(frame)
+            # Convert the frame to Pygame's Surface type.
+            pygame_frame = pygame.image.frombuffer(
+                frame.tostring(), frame_size, 'RGB'
+            )
+            self.display_surface.blit(pygame_frame, (0, 0))
+
         # Exit frame.
         self.camera.exit_frame()
 
@@ -266,19 +250,22 @@ class PygameWindow(object):
                 self.destroy_window()
 
     def destroy_window(self):
-        pygame.display.quit()
         self.is_window_active = False
+        pygame.display.quit()
+
+    def event_loop(self):
+        """Run the main loop."""
+        self.main()
+        self.update_user_interface()
+        self.update_timestamp()
+        fps = self.update_fps()
+        if self.debug:
+            self.display_resolution()
+            self.display_fps(fps)
+            self.display_successes()
+        pygame.display.flip()
+        self.process_events()
 
     def run(self):
-        """Run the main loop."""
         while self.is_window_active:
-            self.main()
-            self.update_user_interface()
-            self.update_timestamp()
-            fps = self.update_fps()
-            if self.debug:
-                self.display_resolution()
-                self.display_fps(fps)
-                self.display_successes()
-            pygame.display.flip()
-            self.process_events()
+            self.event_loop()

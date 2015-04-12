@@ -22,14 +22,14 @@ if __name__ == '__main__':
         dest='width',
         action='store',
         type=int,
-        default=640
+        default=1280
     )
     parser.add_argument(
         '--height',
         dest='height',
         action='store',
         type=int,
-        default=480
+        default=720
     )
     parser.add_argument('--fullscreen', dest='fullscreen', action='store_true')
     parser.add_argument(
@@ -38,9 +38,16 @@ if __name__ == '__main__':
     parser.add_argument('--debug', dest='debug', action='store_true')
     args = parser.parse_args()
 
+    # Must configure logging before instantiating PygameWindow.
+    if args.debug:
+        logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+    else:
+        error_log = 'error.log'
+        logging.basicConfig(filename=error_log, level=logging.ERROR)
+
     qrcode_scanner = PygameWindow(
         name='QR Code Scanner',
-        dshow=args.dshow,
+        direct_show=args.dshow,
         fps=args.fps,
         resolution=(args.width, args.height),
         fullscreen=args.fullscreen,
@@ -48,7 +55,6 @@ if __name__ == '__main__':
     )
 
     if not args.debug:
-        logging.basicConfig(filename='error.log', level=logging.ERROR)
         try:
             qrcode_scanner.run()
         except:
@@ -56,5 +62,4 @@ if __name__ == '__main__':
             with open(error_log, 'a') as f:
                 traceback.print_exc(file=f)
     else:
-        logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
         qrcode_scanner.run()

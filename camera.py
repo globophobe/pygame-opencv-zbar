@@ -71,7 +71,6 @@ class CV2CaptureManager(CaptureManager):
 
     def enter_frame(self):
         """Capture the next frame, if any."""
-
         # But first, check that any previous frame was exited.
         assert not self.entered_frame, \
             'previous enter_frame() had no matching exit_frame()'
