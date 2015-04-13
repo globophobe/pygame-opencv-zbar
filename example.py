@@ -32,9 +32,6 @@ if __name__ == '__main__':
         default=720
     )
     parser.add_argument('--fullscreen', dest='fullscreen', action='store_true')
-    parser.add_argument(
-        '--without-dshow', dest='dshow', action='store_false', default=True
-    )
     parser.add_argument('--debug', dest='debug', action='store_true')
     args = parser.parse_args()
 
@@ -47,7 +44,6 @@ if __name__ == '__main__':
 
     qrcode_scanner = PygameWindow(
         name='QR Code Scanner',
-        direct_show=args.dshow,
         fps=args.fps,
         resolution=(args.width, args.height),
         fullscreen=args.fullscreen,

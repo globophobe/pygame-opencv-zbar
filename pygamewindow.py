@@ -6,8 +6,9 @@ import pygame
 import cv2
 import numpy
 from pygame.locals import K_ESCAPE
-from camera import SIXTEEN_BY_TEN, SIXTEEN_BY_NINE, FOUR_BY_THREE
-from camera import video_capture, cv2_capture
+from camera import (
+    SIXTEEN_BY_TEN, SIXTEEN_BY_NINE, FOUR_BY_THREE, video_capture, cv2_capture
+)
 from qrcodescanner import QRCodeScanner
 
 logger = logging.getLogger(__name__)
@@ -17,10 +18,9 @@ class PygameWindow(object):
     def __init__(
             self,
             name=u'QR Code Scanner',
-            direct_show=False,
             font=None,
             url=None,
-            resolution=(640, 480),
+            resolution=(1280, 720),
             fps=30.0,
             mirror_frame=True,
             fullscreen=True,
@@ -37,7 +37,7 @@ class PygameWindow(object):
         pygame.display.init()
         pygame.mixer.init()
         # First, initialize camera.
-        self.init_camera(resolution, dshow=direct_show)
+        self.init_camera(resolution)
         # Then, initialize the pygame window with the same resolution as the
         # camera.
         self.init_window(name, self.camera.resolution, fullscreen=fullscreen)
@@ -77,11 +77,11 @@ class PygameWindow(object):
             resolutions = aspect_ratios[target_aspect_ratio]
         return resolutions
 
-    def init_camera(self, resolution, dshow=True):
-        def set_camera(resolutions, dshow=dshow):
+    def init_camera(self, resolution):
+        def set_camera(resolutions):
             for resolution in resolutions:
                 if not hasattr(self, 'camera'):
-                    self.set_camera(resolution, dshow=dshow)
+                    self.set_camera(resolution)
                 else:
                     break
         if resolution == (0, 0):
@@ -90,8 +90,8 @@ class PygameWindow(object):
         else:
             set_camera([resolution])
 
-    def set_camera(self, resolution, dshow=True):
-        if platform.system() == 'Windows' and dshow:
+    def set_camera(self, resolution):
+        if platform.system() == 'Windows':
             # TODO : Ensure the camera is set.
             # Setting resolution may fail, with an error.
             try:
