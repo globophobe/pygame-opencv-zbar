@@ -251,7 +251,6 @@ class PygameWindow(object):
 
     def destroy_window(self):
         self.is_window_active = False
-        pygame.display.quit()
 
     def event_loop(self):
         """Run the main loop."""
