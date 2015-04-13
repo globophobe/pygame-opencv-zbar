@@ -175,23 +175,22 @@ class PygameWindow(object):
     def main(self):
         # Prefered interface to OpenCV, with cv2.VideoCapture.grab()
         self.camera.enter_frame()
-
-        if not self.camera.frame.size:
-            self.system_message(msg='Invalid frame from camera.')
-        else:
-            frame = self.scanner.main(self.camera.frame, self.timestamp)
-            frame = self.resize_frame(frame)
-            # Find the frame's dimensions in (w, h) format.
-            frame_size = frame.shape[1::-1]
-            # Mirror preview after processing, or ZBar can't find QR codes.
-            if self.mirror_frame:
-                frame = numpy.fliplr(frame)
-            # Convert the frame to Pygame's Surface type.
-            pygame_frame = pygame.image.frombuffer(
-                frame.tostring(), frame_size, 'RGB'
-            )
-            self.display_surface.blit(pygame_frame, (0, 0))
-
+        if self.camera.frame is not None:
+            if not self.camera.frame.size:
+                self.system_message(msg='Invalid frame from camera.')
+            else:
+                frame = self.scanner.main(self.camera.frame, self.timestamp)
+                frame = self.resize_frame(frame)
+                # Find the frame's dimensions in (w, h) format.
+                frame_size = frame.shape[1::-1]
+                # Mirror preview after processing, or ZBar can't find QR codes.
+                if self.mirror_frame:
+                    frame = numpy.fliplr(frame)
+                # Convert the frame to Pygame's Surface type.
+                pygame_frame = pygame.image.frombuffer(
+                    frame.tostring(), frame_size, 'RGB'
+                )
+                self.display_surface.blit(pygame_frame, (0, 0))
         # Exit frame.
         self.camera.exit_frame()
 
