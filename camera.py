@@ -53,14 +53,6 @@ class CaptureManager(object):
         pass
 
 
-class VideoCaptureManager(CaptureManager):
-    @property
-    def frame(self):
-        if self.capture is not None:
-            pil_image = self.capture.getImage()
-            return np.array(pil_image)
-
-
 class CV2CaptureManager(CaptureManager):
     @property
     def frame(self):
