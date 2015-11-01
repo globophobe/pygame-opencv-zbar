@@ -172,11 +172,20 @@ class QRCodeScanner(object):
                 next_index = 0
             else:
                 next_index = index + 1
-            cv2.line(
-                frame,
-                location[index], location[next_index],
-                color,
-                width,
-                cv2.CV_AA
-            )
+            if cv2.__version__ >= '3.0.0':
+                cv2.line(
+                    frame,
+                    location[index], location[next_index],
+                    color,
+                    width,
+                    lineType=cv2.LINE_AA
+                )
+            else:
+                cv2.line(
+                    frame,
+                    location[index], location[next_index],
+                    color,
+                    width,
+                    cv2.CV_AA
+                )
         return frame

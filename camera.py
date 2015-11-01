@@ -22,8 +22,8 @@ def cv2_capture(resolution):
     capture = cv2.VideoCapture(0)
     capture.set(3, resolution[0])  # CV_CAP_PROP_FRAME_WIDTH
     capture.set(4, resolution[1])  # CV_CAP_PROP_FRAME_HEIGHT
-    # OpenCV doesn't considers the previously set resolution as only a
-    # suggestion.
+    capture.set(5, 30)  # CV_CAP_PROP_FPS
+    # OpenCV considers the previously set resolution as a suggestion.
     current_resolution = int(capture.get(3)), int(capture.get(4))
     return CV2CaptureManager(capture, current_resolution)
 
@@ -65,7 +65,7 @@ class CV2CaptureManager(CaptureManager):
     @property
     def frame(self):
         if self.entered_frame and self._frame is None:
-            _, frame = self.capture.retrieve(channel=self.channel)
+            _, frame = self.capture.retrieve()
             self._frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         return self._frame
 

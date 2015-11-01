@@ -20,7 +20,7 @@ class PygameWindow(object):
             name=u'QR Code Scanner',
             font=None,
             url=None,
-            resolution=(1280, 720),
+            resolution=(640, 480),
             fps=30.0,
             mirror_frame=True,
             fullscreen=True,
@@ -131,7 +131,8 @@ class PygameWindow(object):
             )
         else:
             self.display_surface = pygame.display.set_mode(
-                self.fit_camera_to_display(), pygame.RESIZABLE
+                self.fit_camera_to_display(),
+                pygame.RESIZABLE
             )
 
         if self.debug:
