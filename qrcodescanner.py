@@ -29,7 +29,6 @@ def thumbnail(picture, size=0.50):
 def save_picture(picture, path, filename):
     '''Experiments with StringIO were unsatisfactory. Images were never
     well compressed. Let's save to temporary storage instead.'''
-    picture = thumbnail(picture)
     storage = os.path.join(path, filename)
     picture.save(storage, optimize=True, format='JPEG')
     return storage

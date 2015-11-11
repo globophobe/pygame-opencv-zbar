@@ -7,7 +7,7 @@ import cv2
 import numpy
 from pygame.locals import K_ESCAPE
 from camera import (
-    SIXTEEN_BY_TEN, SIXTEEN_BY_NINE, FOUR_BY_THREE, video_capture, cv2_capture
+    SIXTEEN_BY_TEN, SIXTEEN_BY_NINE, FOUR_BY_THREE, cv2_capture
 )
 from qrcodescanner import QRCodeScanner
 
@@ -91,22 +91,14 @@ class PygameWindow(object):
             set_camera([resolution])
 
     def set_camera(self, resolution):
-        if platform.system() == 'Windows':
-            # TODO : Ensure the camera is set.
-            # Setting resolution may fail, with an error.
-            try:
-                camera = video_capture(resolution)
-            except:
-                pass
-        else:
-            camera = cv2_capture(resolution)
-            if camera.resolution != resolution:
-                # Setting resolution may fail, without an error, try 3 times.
-                # Could this be because the camera is not fully initialized...
-                for i in range(3):
-                    camera = cv2_capture(resolution)
-                    if camera.resolution == resolution:
-                        break
+        camera = cv2_capture(resolution)
+        if camera.resolution != resolution:
+            # Setting resolution may fail, without an error, try 3 times.
+            # Could this be because the camera is not fully initialized...
+            for i in range(3):
+                camera = cv2_capture(resolution)
+                if camera.resolution == resolution:
+                    break
         self.camera = camera
 
     def fit_camera_to_display(self):

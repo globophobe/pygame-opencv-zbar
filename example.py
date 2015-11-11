@@ -22,14 +22,14 @@ if __name__ == '__main__':
         dest='width',
         action='store',
         type=int,
-        default=1280
+        default=640
     )
     parser.add_argument(
         '--height',
         dest='height',
         action='store',
         type=int,
-        default=720
+        default=480
     )
     parser.add_argument('--fullscreen', dest='fullscreen', action='store_true')
     parser.add_argument('--debug', dest='debug', action='store_true')
