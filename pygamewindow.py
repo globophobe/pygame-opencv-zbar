@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import datetime
-import platform
 import logging
 import pygame
 import cv2
@@ -20,12 +19,16 @@ class PygameWindow(object):
             name=u'QR Code Scanner',
             font=None,
             url=None,
-            resolution=(640, 480),
+            client=None,
+            api_key=None,
+            resolution=(1280, 720),
             fps=30.0,
             mirror_frame=True,
             fullscreen=True,
             debug=False):
         self.url = url
+        self.client = client
+        self.api_key = api_key
         self.resolution = resolution
         self.fps = fps
         self.mirror_frame = mirror_frame
@@ -157,10 +160,10 @@ class PygameWindow(object):
             pygame.display.flip()
 
     def init_scanner(self):
-        # Show a loading message while QR code scanner initializes.
         # Init QR code scanner
-        width_gt_1000 = self.display_surface.get_size()[0] >= 1000
-        box_width = 2 if width_gt_1000 else 1
+        x, y = self.display_surface.get_size()
+        screen_size_gt_800x400 = ((x * y) >= 320000)
+        box_width = 2 if screen_size_gt_800x400 else 1
         self.scanner = QRCodeScanner(
             url=self.url, box_width=box_width, debug=self.debug
         )
