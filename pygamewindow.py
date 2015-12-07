@@ -19,7 +19,6 @@ class PygameWindow(object):
             name=u'QR Code Scanner',
             font=None,
             url=None,
-            client=None,
             api_key=None,
             resolution=(1280, 720),
             fps=30.0,
@@ -27,7 +26,6 @@ class PygameWindow(object):
             fullscreen=True,
             debug=False):
         self.url = url
-        self.client = client
         self.api_key = api_key
         self.resolution = resolution
         self.fps = fps
