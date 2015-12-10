@@ -20,6 +20,7 @@ class PygameWindow(object):
             font=None,
             url=None,
             api_key=None,
+            max_qrcode_size=0.0,
             resolution=(1280, 720),
             fps=30.0,
             mirror_frame=True,
@@ -27,6 +28,7 @@ class PygameWindow(object):
             debug=False):
         self.url = url
         self.api_key = api_key
+        self.max_qrcode_size = max_qrcode_size
         self.resolution = resolution
         self.fps = fps
         self.mirror_frame = mirror_frame
