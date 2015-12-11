@@ -21,13 +21,18 @@ class PygameWindow(object):
             url=None,
             api_key=None,
             max_qrcode_size=0.0,
+            ok_throttle=60,
+            not_ok_throttle=3,
             resolution=(1280, 720),
             fps=30.0,
             mirror_frame=True,
+            network_timeout=10,
             fullscreen=True,
             debug=False):
         self.url = url
         self.api_key = api_key
+        self.ok_throttle = ok_throttle
+        self.not_ok_throttle = not_ok_throttle
         self.max_qrcode_size = max_qrcode_size
         self.resolution = resolution
         self.fps = fps
@@ -35,6 +40,7 @@ class PygameWindow(object):
         self.font = font
         self.timestamp = datetime.datetime.now()
         self.clock = pygame.time.Clock()
+        self.network_timeout = network_timeout
         self.debug = debug
         pygame.init()
         pygame.display.init()
