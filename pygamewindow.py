@@ -254,7 +254,7 @@ class PygameWindow(object):
         self.is_window_active = False
 
     def event_loop(self):
-        """Run the main loop."""
+        """Run the main loop"""
         self.main()
         self.update_user_interface()
         self.update_timestamp()
